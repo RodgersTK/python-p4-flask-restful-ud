@@ -1,24 +1,16 @@
-#!/usr/bin/env python3
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy_serializer import SerializerMixin
 
-from faker import Faker
+db = SQLAlchemy()
 
-from app import app
-from models import db, Newsletter
+class Newsletter(db.Model, SerializerMixin):
+    __tablename__ = 'newsletters'
 
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String)
+    body = db.Column(db.String)
+    published_at = db.Column(db.DateTime, server_default=db.func.now())
+    edited_at = db.Column(db.DateTime, onupdate=db.func.now())
 
-with app.app_context():
-    
-    fake = Faker()
-
-    Newsletter.query.delete()
-
-    newsletters = []
-    for i in range(50):
-        newsletter = Newsletter(
-            title = fake.text(max_nb_chars=20),
-            body = fake.paragraph(nb_sentences=5),
-        )
-        newsletters.append(newsletter)
-
-    db.session.add_all(newsletters)
-    db.session.commit()
+    def __repr__(self):
+        return f'<Newsletter {self.title}, published at {self.published_at}.>'
